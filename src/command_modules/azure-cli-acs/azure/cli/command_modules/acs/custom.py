@@ -1417,6 +1417,72 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
+def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_name='default'):
+    """
+    Use Azure Dev Connect with a managed Kubernetes cluster.
+
+    :param cluster_name: Name of the target AKS cluster.
+    :type cluster_name: String
+    :param resource_group_name: Name of the target AKS cluster's resource group.
+    :type resource_group_name: String
+    :param space_name: The isolated space in the cluster to develop in.
+    :type space_name: String
+    """
+
+    logger.info('Installing Dev Connect commands...')
+    vsce_tool = 'Visual Studio Connected Development Services'
+    vsce_cli = 'vsce'
+
+    from subprocess import PIPE, Popen
+    install_vsce = False
+    try:
+        Popen([vsce_cli], stdout=PIPE, stderr=PIPE)
+    except OSError:
+        install_vsce = True
+
+    if install_vsce:
+        # Install VSCE
+        system = platform.system()
+        if system == 'Linux':
+            # Linux
+            raise CLIError('Linux is not supported yet.')
+        elif system == 'Darwin':
+            # OS X
+            try:
+                setup_file = 'vsce-osx-setup.sh'
+                import urllib.request
+                urllib.request.urlretrieve ("https://aka.ms/get-vsce-mac",setup_file)
+                subprocess.call(
+                    ['bash', setup_file], universal_newlines=True)
+                os.remove(setup_file)
+            except subprocess.CalledProcessError as err:
+                raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
+            except PermissionError:
+                raise CLIError('Installing {} tooling needs permissions.'.format(vsce_tool))
+        elif system == 'Windows':
+            # Windows
+            try:
+                setup_file = 'vsce-winx-setup.exe'
+                import urllib.request
+                urllib.request.urlretrieve ("https://aka.ms/get-vsce-windows",setup_file)
+                subprocess.call(
+                    [setup_file], stdin=None, stdout=None, stderr=None, shell=False)
+                os.remove(setup_file)
+            except subprocess.CalledProcessError as err:
+                raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
+    try:
+        Popen([vsce_cli], stdout=PIPE, stderr=PIPE)
+    except OSError:
+        raise CLIError('{} not detected, please verify if it is installed.'.format(vsce_tool))
+
+    try:
+        subprocess.call(
+            [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', resource_group_name],
+            universal_newlines=True)
+    except subprocess.CalledProcessError as err:
+        raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
+   
+    logger.info("Use '{}' commands for connected development".format(vsce_cli))
 
 def _ensure_aks_service_principal(cli_ctx,
                                   service_principal=None,
