@@ -1451,7 +1451,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
             try:
                 setup_file = 'vsce-osx-setup.sh'
                 import urllib.request
-                urllib.request.urlretrieve ("https://aka.ms/get-vsce-mac",setup_file)
+                urllib.request.urlretrieve ("https://aka.ms/get-vsce-mac", setup_file)
                 subprocess.call(
                     ['bash', setup_file], universal_newlines=True)
                 os.remove(setup_file)
@@ -1464,7 +1464,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
             try:
                 setup_file = 'vsce-winx-setup.exe'
                 import urllib.request
-                urllib.request.urlretrieve ("https://aka.ms/get-vsce-windows",setup_file)
+                urllib.request.urlretrieve ("https://aka.ms/get-vsce-windows", setup_file)
                 subprocess.call(
                     [setup_file], stdin=None, stdout=None, stderr=None, shell=False)
                 os.remove(setup_file)
@@ -1481,7 +1481,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
             universal_newlines=True)
     except subprocess.CalledProcessError as err:
         raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
-   
+
     logger.info("Use '{}' commands for connected development".format(vsce_cli))
 
 def _ensure_aks_service_principal(cli_ctx,
