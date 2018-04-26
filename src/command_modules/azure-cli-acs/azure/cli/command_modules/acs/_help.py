@@ -410,6 +410,9 @@ helps['aks remove-dev-connect'] = """
         - name: --resource-group -g
           type: string
           short-summary: Name of the target AKS cluster's resource group.
+        - name: --yes -y
+          type: bool
+          short-summary: Do not prompt for confirmation.
 """
 
 helps['aks wait'] = """

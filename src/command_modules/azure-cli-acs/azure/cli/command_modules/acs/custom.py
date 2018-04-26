@@ -1463,7 +1463,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
             # Windows
             try:
                 setup_file = 'vsce-winx-setup.exe'
-                setup_url = "https://aka.ms/get-vsce-windows"
+                setup_url = "https://aka.ms/get-vsce-windows-dev"
                 import urllib.request
                 urllib.request.urlretrieve(setup_url, setup_file)
                 subprocess.call(
@@ -1479,13 +1479,13 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     create_dev = False
     try:
         from subprocess import PIPE, Popen
-        child = Popen([vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name], stdout=PIPE, stderr=PIPE)
+        child = Popen([vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name], stderr=PIPE)
         rc = child.returncode
         if rc == 1:
             create_dev = True
     except subprocess.CalledProcessError as err:
         create_dev = True
-    
+
     if create_dev:
         try:
             subprocess.call(
@@ -1494,7 +1494,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
         except subprocess.CalledProcessError as err:
             raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
 
-def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name): # pylint: disable=line-too-long
+def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt=False): # pylint: disable=line-too-long
     """
     Remove Azure Dev Connect from a managed Kubernetes cluster.
 
@@ -1511,11 +1511,15 @@ def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name): # pyl
         _ensure_dev_connected_installed(vsce_cli)
     except OSError:
         raise CLIError("{} not detected, please verify if it is installed. Use 'az aks use-dev-connect' commands for connected development.".format(vsce_tool))
+    
+    # remove_command_arguments = "env rm --name {} --resource-group {}".format(cluster_name, resource_group_name)
+    remove_command_arguments = [vsce_cli, 'env', 'rm', '--name', cluster_name, '--resource-group', resource_group_name]
 
+    if prompt:
+        remove_command_arguments.append('-f')
     try:
         subprocess.call(
-            [vsce_cli, 'env', 'rm', '--name', cluster_name, '--resource-group', resource_group_name],
-            universal_newlines=True)
+            remove_command_arguments, universal_newlines=True)
     except subprocess.CalledProcessError as err:
         raise CLIError('{} deletion failure: {}.'.format(vsce_tool, err))
 
