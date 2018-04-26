@@ -1430,7 +1430,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     """
 
     vsce_tool = 'Visual Studio Connected Development Services'
-    vsce_cli = 'vsce1'
+    vsce_cli = 'vsce'
 
     install_vsce = False
     try:
@@ -1478,10 +1478,15 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
 
     try:
         subprocess.call(
-            [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', resource_group_name],
+            [vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name],
             universal_newlines=True)
     except subprocess.CalledProcessError as err:
-        raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
+        try:
+            subprocess.call(
+                [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', resource_group_name],
+                universal_newlines=True)
+        except subprocess.CalledProcessError as err:
+            raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
 
 def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name): # pylint: disable=line-too-long
     """
