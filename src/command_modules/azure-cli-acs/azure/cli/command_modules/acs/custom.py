@@ -1476,11 +1476,17 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     except OSError:
         raise CLIError("{} not installed properly. Use 'az aks use-dev-connect' commands for connected development.".format(vsce_tool))
 
+    create_dev = False
     try:
-        subprocess.call(
-            [vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name],
-            universal_newlines=True)
+        from subprocess import PIPE, Popen
+        child = Popen([vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name], stdout=PIPE, stderr=PIPE)
+        rc = child.returncode
+        if rc == 1:
+            create_dev = True
     except subprocess.CalledProcessError as err:
+        create_dev = True
+    
+    if create_dev:
         try:
             subprocess.call(
                 [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', resource_group_name],
