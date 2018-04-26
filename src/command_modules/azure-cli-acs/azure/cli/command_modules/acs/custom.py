@@ -1454,7 +1454,6 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     except OSError:
         install_vsce = True
 
-    logger.info(install_vsce)
     if install_vsce:
         # Install VSCE
         logger.info('Installing Dev Connect commands...')
