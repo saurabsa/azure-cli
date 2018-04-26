@@ -1478,10 +1478,9 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
 
     create_dev = False
     try:
-        from subprocess import PIPE, Popen
-        child = Popen([vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name], stderr=PIPE)
-        rc = child.returncode
-        if rc == 1:
+        from subprocess import PIPE
+        retCode = subprocess.call([vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name], stderr=PIPE)
+        if retCode == 1:
             create_dev = True
     except subprocess.CalledProcessError as err:
         create_dev = True
