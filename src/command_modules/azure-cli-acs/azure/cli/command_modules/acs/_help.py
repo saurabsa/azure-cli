@@ -386,7 +386,7 @@ helps['aks upgrade-connector'] = """
 
 helps['aks use-dev-connect'] = """
     type: command
-    short-summary: Use Azure Dev Connect with a managed Kubernetes cluster.
+    short-summary: (PREVIEW) Use Azure Dev Connect with a managed Kubernetes cluster.
     long-summary: "If needed, a Dev Connect service will be created and connected to the target cluster, and Dev Connect commands will be installed on this machine."
     parameters:
         - name: --cluster-name -n
@@ -398,6 +398,18 @@ helps['aks use-dev-connect'] = """
         - name: --space -s
           type: string
           short-summary: The isolated space in the cluster to develop in.
+"""
+
+helps['aks remove-dev-connect'] = """
+    type: command
+    short-summary: (PREVIEW) Remove Azure Dev Connect from a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name -n
+          type: string
+          short-summary: Name of the target AKS cluster.
+        - name: --resource-group -g
+          type: string
+          short-summary: Name of the target AKS cluster's resource group.
 """
 
 helps['aks wait'] = """
