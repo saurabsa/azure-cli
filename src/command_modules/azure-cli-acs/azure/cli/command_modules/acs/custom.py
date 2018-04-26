@@ -1454,6 +1454,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     except OSError:
         install_vsce = True
 
+    logger.info(install_vsce)
     if install_vsce:
         # Install VSCE
         logger.info('Installing Dev Connect commands...')
@@ -1461,7 +1462,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
         urllib.request.urlretrieve(setup_url, setup_file)
         try:
             subprocess.call(
-                setup_args, universal_newlines=True)
+                setup_args, universal_newlines=True, stdin=None, stdout=None, stderr=None, shell=False)
             os.remove(setup_file)
         except subprocess.CalledProcessError as err:
             raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
