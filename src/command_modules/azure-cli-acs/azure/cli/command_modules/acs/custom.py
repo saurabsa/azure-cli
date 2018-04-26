@@ -1431,8 +1431,24 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
 
     vsce_tool = 'Visual Studio Connected Development Services'
     vsce_cli = 'vsce'
-
     install_vsce = False
+    system = platform.system()
+    if system == 'Linux':
+        # Linux
+        raise CLIError('Linux is not supported yet.')
+    elif system == 'Windows':
+        # Windows
+        # Dev Connect Install Path (WinX)
+        vsce_cli = "C:\\Program Files\\Microsoft SDKs\\Azure\\Visual Studio Connected Environment CLI\\vsce.exe"
+        setup_file = 'vsce-winx-setup.exe'
+        setup_url = "https://aka.ms/get-vsce-windows-dev"
+        setup_args = [setup_file]
+    elif system == 'Darwin':
+        # OSX
+        setup_file = 'vsce-osx-setup.sh'
+        setup_url = "https://mindarodev.blob.core.windows.net/vscesetup/LKS/vsce-osx-setup.sh"
+        setup_args = ['bash', setup_file]
+
     try:
         _ensure_dev_connected_installed(vsce_cli)
     except OSError:
@@ -1441,36 +1457,17 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     if install_vsce:
         # Install VSCE
         logger.info('Installing Dev Connect commands...')
-        system = platform.system()
-        if system == 'Linux':
-            # Linux
-            raise CLIError('Linux is not supported yet.')
-        elif system == 'Darwin':
-            # OS X
-            try:
-                setup_file = 'vsce-osx-setup.sh'
-                setup_url = "https://mindarodev.blob.core.windows.net/vscesetup/LKS/vsce-osx-setup.sh"
-                import urllib.request
-                urllib.request.urlretrieve(setup_url, setup_file)
-                subprocess.call(
-                    ['bash', setup_file], universal_newlines=True)
-                os.remove(setup_file)
-            except subprocess.CalledProcessError as err:
-                raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
-            except PermissionError:
-                raise CLIError('Installing {} tooling needs permissions.'.format(vsce_tool))
-        elif system == 'Windows':
-            # Windows
-            try:
-                setup_file = 'vsce-winx-setup.exe'
-                setup_url = "https://aka.ms/get-vsce-windows-dev"
-                import urllib.request
-                urllib.request.urlretrieve(setup_url, setup_file)
-                subprocess.call(
-                    [setup_file], stdin=None, stdout=None, stderr=None, shell=False)
-                os.remove(setup_file)
-            except subprocess.CalledProcessError as err:
-                raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
+        import urllib.request
+        urllib.request.urlretrieve(setup_url, setup_file)
+        try:
+            subprocess.call(
+                setup_args, universal_newlines=True)
+            os.remove(setup_file)
+        except subprocess.CalledProcessError as err:
+            raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
+        except PermissionError:
+            raise CLIError('Installing {} tooling needs permissions.'.format(vsce_tool))
+
     try:
         _ensure_dev_connected_installed(vsce_cli)
     except OSError:
@@ -1501,6 +1498,8 @@ def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt
     :type cluster_name: String
     :param resource_group_name: Name of the target AKS cluster's resource group.
     :type resource_group_name: String
+    :param prompt: Do not prompt for confirmation.
+    :type prompt: bool
     """
 
     vsce_tool = 'Visual Studio Connected Development Services'
@@ -1510,8 +1509,7 @@ def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt
         _ensure_dev_connected_installed(vsce_cli)
     except OSError:
         raise CLIError("{} not detected, please verify if it is installed. Use 'az aks use-dev-connect' commands for connected development.".format(vsce_tool))
-    
-    # remove_command_arguments = "env rm --name {} --resource-group {}".format(cluster_name, resource_group_name)
+
     remove_command_arguments = [vsce_cli, 'env', 'rm', '--name', cluster_name, '--resource-group', resource_group_name]
 
     if prompt:
