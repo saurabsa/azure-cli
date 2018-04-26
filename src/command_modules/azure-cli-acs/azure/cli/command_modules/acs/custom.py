@@ -1463,7 +1463,7 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
             # Windows
             try:
                 setup_file = 'vsce-winx-setup.exe'
-                setup_url = "https://mindarodev.blob.core.windows.net/vscesetup/LKS/Visual Studio Connected Environment CLI.exe"
+                setup_url = "https://aka.ms/get-vsce-windows"
                 import urllib.request
                 urllib.request.urlretrieve(setup_url, setup_file)
                 subprocess.call(
